@@ -4,221 +4,90 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0f6cbd">
-  <title>Formulário para compartilhar em XLSX</title>
+  <title>Formulário de solicitação</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
-    :root {
-      --azul:#0f6cbd; --azul-escuro:#115ea3; --fundo:#f4f6f8;
-      --texto:#242424; --borda:#d1d1d1; --verde:#107c10; --alerta:#8a6500;
-    }
-    * { box-sizing:border-box; }
-    body {
-      margin:0; min-height:100vh; font-family:Segoe UI, Arial, sans-serif;
-      background:var(--fundo); color:var(--texto);
-    }
-    .container { max-width:760px; margin:0 auto; padding:20px 14px 32px; }
-    .card { background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 6px 24px rgba(0,0,0,.10); }
-    .topo { padding:24px 22px; color:#fff; background:linear-gradient(135deg, var(--azul), #164f86); }
-    .topo h1 { margin:0 0 8px; font-size:24px; }
-    .topo p { margin:0; line-height:1.45; opacity:.94; }
-    form { padding:22px; }
-    .grid { display:grid; grid-template-columns:1fr 1fr; gap:17px; }
-    .campo { display:flex; flex-direction:column; gap:7px; }
-    .campo.largo { grid-column:1/-1; }
-    label { font-size:14px; font-weight:650; }
-    input, select, textarea {
-      width:100%; min-height:46px; padding:11px 12px; border:1px solid var(--borda);
-      border-radius:9px; background:#fff; color:var(--texto); font:inherit; font-size:16px;
-    }
-    textarea { min-height:125px; resize:vertical; }
-    input:focus, select:focus, textarea:focus { outline:3px solid #c7e0f4; border-color:var(--azul); }
-    .acoes { display:grid; grid-template-columns:2fr 1fr; gap:11px; margin-top:23px; }
-    button { min-height:50px; border:0; border-radius:9px; padding:12px 15px; font:inherit; font-weight:700; cursor:pointer; }
-    .primario { color:#fff; background:var(--azul); }
-    .primario:active { background:var(--azul-escuro); transform:scale(.99); }
-    .secundario { color:var(--texto); background:#ececec; }
-    .status { display:none; margin-top:17px; padding:13px 14px; border-radius:8px; line-height:1.45; }
-    .status.ok { display:block; color:#0b5f0b; background:#dff6dd; }
-    .status.aviso { display:block; color:#684b00; background:#fff4ce; }
-    .status.erro { display:block; color:#a4262c; background:#fde7e9; }
-    .nota { margin:0 22px 22px; padding:13px 14px; border-left:4px solid var(--azul); background:#f0f6fb; border-radius:5px; font-size:14px; line-height:1.45; }
-    @media (max-width:620px) {
-      .container { padding:0; }
-      .card { min-height:100vh; border-radius:0; }
-      .grid { grid-template-columns:1fr; }
-      .campo.largo { grid-column:auto; }
-      .acoes { grid-template-columns:1fr; }
-      .topo { padding-top:calc(24px + env(safe-area-inset-top)); }
-    }
+    :root{--azul:#0f6cbd;--azul2:#115ea3;--fundo:#f4f6f8;--texto:#242424;--borda:#d1d1d1}
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;font-family:Segoe UI,Arial,sans-serif;background:var(--fundo);color:var(--texto)}
+    .container{max-width:760px;margin:0 auto;padding:20px 14px 32px}.card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.1)}
+    .topo{padding:24px 22px;color:#fff;background:linear-gradient(135deg,var(--azul),#164f86)}.topo h1{margin:0 0 8px;font-size:24px}.topo p{margin:0;line-height:1.45;opacity:.94}
+    form{padding:22px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:17px}.campo{display:flex;flex-direction:column;gap:7px}.largo{grid-column:1/-1}
+    label{font-size:14px;font-weight:650}input,select,textarea{width:100%;min-height:46px;padding:11px 12px;border:1px solid var(--borda);border-radius:9px;background:#fff;color:var(--texto);font:inherit;font-size:16px}
+    textarea{min-height:125px;resize:vertical}input:focus,select:focus,textarea:focus{outline:3px solid #c7e0f4;border-color:var(--azul)}
+    .acoes{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:23px}.limpar{grid-column:1/-1}
+    button{min-height:50px;border:0;border-radius:9px;padding:12px 15px;font:inherit;font-weight:700;cursor:pointer}.primario{color:#fff;background:var(--azul)}.primario:active{background:var(--azul2);transform:scale(.99)}
+    .secundario{color:var(--texto);background:#ececec}button:disabled{opacity:.5;cursor:not-allowed}.status{display:none;margin-top:17px;padding:13px 14px;border-radius:8px;line-height:1.45}.status.ok{display:block;color:#0b5f0b;background:#dff6dd}.status.aviso{display:block;color:#684b00;background:#fff4ce}.status.erro{display:block;color:#a4262c;background:#fde7e9}
+    .nota{margin:0 22px 22px;padding:13px 14px;border-left:4px solid var(--azul);background:#f0f6fb;border-radius:5px;font-size:14px;line-height:1.45}
+    @media(max-width:620px){.container{padding:0}.card{min-height:100vh;border-radius:0}.grid{grid-template-columns:1fr}.largo{grid-column:auto}.acoes{grid-template-columns:1fr}.limpar{grid-column:auto}.topo{padding-top:calc(24px + env(safe-area-inset-top))}}
   </style>
 </head>
 <body>
-  <main class="container">
-    <section class="card">
-      <header class="topo">
-        <h1>Formulário de solicitação</h1>
-        <p>Preencha os dados e compartilhe a planilha diretamente com o Outlook, Gmail ou outro aplicativo no Android.</p>
-      </header>
-
-      <form id="formulario">
-        <div class="grid">
-          <div class="campo">
-            <label for="nome">Nome *</label>
-            <input id="nome" name="nome" autocomplete="name" required>
-          </div>
-          <div class="campo">
-            <label for="matricula">Matrícula</label>
-            <input id="matricula" name="matricula" inputmode="numeric">
-          </div>
-          <div class="campo">
-            <label for="setor">Setor *</label>
-            <input id="setor" name="setor" required>
-          </div>
-          <div class="campo">
-            <label for="email">E-mail do solicitante *</label>
-            <input id="email" name="email" type="email" autocomplete="email" inputmode="email" required>
-          </div>
-          <div class="campo">
-            <label for="data">Data *</label>
-            <input id="data" name="data" type="date" required>
-          </div>
-          <div class="campo">
-            <label for="tipo">Tipo da solicitação *</label>
-            <select id="tipo" name="tipo" required>
-              <option value="">Selecione</option>
-              <option>Suporte de TI</option>
-              <option>Acesso</option>
-              <option>Equipamento</option>
-              <option>Impressora</option>
-              <option>Outro</option>
-            </select>
-          </div>
-          <div class="campo largo">
-            <label for="descricao">Descrição *</label>
-            <textarea id="descricao" name="descricao" required></textarea>
-          </div>
-        </div>
-
-        <div class="acoes">
-          <button type="submit" class="primario">Compartilhar XLSX</button>
-          <button type="reset" class="secundario">Limpar</button>
-        </div>
-        <div id="status" class="status" role="status" aria-live="polite"></div>
-      </form>
-
-      <div class="nota">
-        No Android, abra esta página por um endereço <strong>HTTPS</strong> no Chrome ou Edge. Toque em <strong>Compartilhar XLSX</strong> e escolha Outlook ou Gmail. Abrir o HTML diretamente da pasta Downloads pode bloquear o compartilhamento.
-      </div>
-    </section>
-  </main>
-
+<main class="container"><section class="card">
+  <header class="topo"><h1>Formulário de solicitação</h1><p>Gere a planilha e depois compartilhe pelo Outlook, Gmail ou outro aplicativo no Android.</p></header>
+  <form id="formulario">
+    <div class="grid">
+      <div class="campo"><label for="nome">Nome *</label><input id="nome" autocomplete="name" required></div>
+      <div class="campo"><label for="matricula">Matrícula</label><input id="matricula" inputmode="numeric"></div>
+      <div class="campo"><label for="setor">Setor *</label><input id="setor" required></div>
+      <div class="campo"><label for="email">E-mail do solicitante *</label><input id="email" type="email" autocomplete="email" inputmode="email" required></div>
+      <div class="campo"><label for="data">Data *</label><input id="data" type="date" required></div>
+      <div class="campo"><label for="tipo">Tipo da solicitação *</label><select id="tipo" required><option value="">Selecione</option><option>Suporte de TI</option><option>Acesso</option><option>Equipamento</option><option>Impressora</option><option>Outro</option></select></div>
+      <div class="campo largo"><label for="descricao">Descrição *</label><textarea id="descricao" required></textarea></div>
+    </div>
+    <div class="acoes">
+      <button type="button" id="gerar" class="primario">1. Gerar XLSX</button>
+      <button type="button" id="compartilhar" class="primario" disabled>2. Compartilhar</button>
+      <button type="reset" class="secundario limpar">Limpar formulário</button>
+    </div>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+  </form>
+  <div class="nota">Abra esta página diretamente no <strong>Chrome</strong> ou <strong>Edge</strong>. Primeiro toque em <strong>1. Gerar XLSX</strong> e, depois, em <strong>2. Compartilhar</strong>.</div>
+</section></main>
 <script>
-  const formulario = document.getElementById("formulario");
-  const statusEl = document.getElementById("status");
-  document.getElementById("data").valueAsDate = new Date();
+const formulario=document.getElementById('formulario');
+const statusEl=document.getElementById('status');
+const botaoCompartilhar=document.getElementById('compartilhar');
+document.getElementById('data').valueAsDate=new Date();
+let arquivoPreparado=null;
 
-  function mostrarStatus(texto, tipo) {
-    statusEl.textContent = texto;
-    statusEl.className = "status " + tipo;
+function mostrarStatus(texto,tipo){statusEl.textContent=texto;statusEl.className='status '+tipo}
+function limparNomeArquivo(texto){return texto.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'_').replace(/^_+|_+$/g,'')}
+function obterDados(){return {'Nome':document.getElementById('nome').value.trim(),'Matrícula':document.getElementById('matricula').value.trim(),'Setor':document.getElementById('setor').value.trim(),'E-mail':document.getElementById('email').value.trim(),'Data':document.getElementById('data').value,'Tipo da solicitação':document.getElementById('tipo').value,'Descrição':document.getElementById('descricao').value.trim()}}
+
+document.getElementById('gerar').addEventListener('click',()=>{
+  if(!formulario.reportValidity())return;
+  if(typeof XLSX==='undefined'){mostrarStatus('Não foi possível carregar o gerador de Excel. Verifique a internet.','erro');return}
+  try{
+    const dados=obterDados();
+    const linhas=Object.entries(dados).map(([Campo,Resposta])=>({Campo,Resposta}));
+    const folha=XLSX.utils.json_to_sheet(linhas); folha['!cols']=[{wch:24},{wch:72}];
+    const pasta=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(pasta,folha,'Formulário');
+    const conteudo=XLSX.write(pasta,{bookType:'xlsx',type:'array'});
+    const blob=new Blob([conteudo],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const hoje=new Date().toISOString().slice(0,10);
+    const nome=`Formulario_${limparNomeArquivo(dados['Nome']||'Sem_nome')}_${hoje}.xlsx`;
+    arquivoPreparado=new File([blob],nome,{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    botaoCompartilhar.disabled=false;
+    mostrarStatus('Planilha gerada. Agora toque em 2. Compartilhar.','ok');
+  }catch(erro){mostrarStatus(`Erro ao gerar a planilha: ${erro.message||erro}.`,'erro')}
+});
+
+botaoCompartilhar.addEventListener('click',async()=>{
+  if(!arquivoPreparado){mostrarStatus('Primeiro toque em 1. Gerar XLSX.','aviso');return}
+  try{
+    if(!window.isSecureContext)throw new DOMException('A página não está em HTTPS.','SecurityError');
+    if(!navigator.share||!navigator.canShare)throw new DOMException('O navegador não oferece compartilhamento de arquivos.','NotSupportedError');
+    if(!navigator.canShare({files:[arquivoPreparado]}))throw new DOMException('O navegador não aceita arquivos XLSX.','NotSupportedError');
+    await navigator.share({files:[arquivoPreparado]});
+    mostrarStatus('Arquivo entregue ao aplicativo escolhido.','ok');
+  }catch(erro){
+    if(erro&&erro.name==='AbortError'){mostrarStatus('Compartilhamento cancelado.','aviso');return}
+    const detalhe=erro?`${erro.name||'Erro'}: ${erro.message||'sem detalhes'}`:'erro desconhecido';
+    mostrarStatus(`Falha ao compartilhar (${detalhe}). Abra a página diretamente no Chrome ou Edge, não dentro de outro aplicativo.`,'erro');
   }
+});
 
-  function limparNomeArquivo(texto) {
-    return texto.normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-zA-Z0-9_-]+/g, "_")
-      .replace(/^_+|_+$/g, "");
-  }
-
-  function baixarArquivo(blob, nomeArquivo) {
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = nomeArquivo;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1500);
-  }
-
-  formulario.addEventListener("reset", () => {
-    setTimeout(() => {
-      document.getElementById("data").valueAsDate = new Date();
-      statusEl.className = "status";
-      statusEl.textContent = "";
-    }, 0);
-  });
-
-  formulario.addEventListener("submit", async (evento) => {
-    evento.preventDefault();
-    if (!formulario.reportValidity()) return;
-
-    if (typeof XLSX === "undefined") {
-      mostrarStatus("Não foi possível carregar o gerador de Excel. Verifique a conexão com a internet e tente novamente.", "erro");
-      return;
-    }
-
-    const dados = {
-      "Nome": document.getElementById("nome").value.trim(),
-      "Matrícula": document.getElementById("matricula").value.trim(),
-      "Setor": document.getElementById("setor").value.trim(),
-      "E-mail": document.getElementById("email").value.trim(),
-      "Data": document.getElementById("data").value,
-      "Tipo da solicitação": document.getElementById("tipo").value,
-      "Descrição": document.getElementById("descricao").value.trim()
-    };
-
-    const linhas = Object.entries(dados).map(([campo, resposta]) => ({ Campo: campo, Resposta: resposta }));
-    const folha = XLSX.utils.json_to_sheet(linhas);
-    folha["!cols"] = [{ wch: 24 }, { wch: 72 }];
-
-    const pasta = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(pasta, folha, "Formulário");
-
-    const conteudo = XLSX.write(pasta, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([conteudo], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    });
-
-    const hoje = new Date().toISOString().slice(0, 10);
-    const nomeArquivo = `Formulario_${limparNomeArquivo(dados["Nome"] || "Sem_nome")}_${hoje}.xlsx`;
-    const arquivo = new File([blob], nomeArquivo, {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    });
-
-    // Compartilhar somente o arquivo aumenta a compatibilidade no Android.
-    // Alguns aplicativos rejeitam a combinação arquivo + título + texto.
-    const compartilhar = { files: [arquivo] };
-
-    try {
-      if (!window.isSecureContext) {
-        baixarArquivo(blob, nomeArquivo);
-        mostrarStatus("O compartilhamento de anexos exige uma página HTTPS. Este arquivo foi aberto localmente ou em uma conexão não segura. A planilha foi baixada.", "aviso");
-        return;
-      }
-
-      if (!navigator.share || !navigator.canShare) {
-        baixarArquivo(blob, nomeArquivo);
-        mostrarStatus("Este navegador não oferece compartilhamento de arquivos. Abra a página no Chrome ou Edge atualizado. A planilha foi baixada.", "aviso");
-        return;
-      }
-
-      if (!navigator.canShare({ files: [arquivo] })) {
-        baixarArquivo(blob, nomeArquivo);
-        mostrarStatus("Este navegador não aceita compartilhar arquivos XLSX. A planilha foi baixada.", "aviso");
-        return;
-      }
-
-      await navigator.share(compartilhar);
-      mostrarStatus("Planilha enviada ao aplicativo escolhido. Confira o destinatário e toque em Enviar.", "ok");
-    } catch (erro) {
-      if (erro && erro.name === "AbortError") {
-        mostrarStatus("Compartilhamento cancelado. Toque novamente no botão quando quiser continuar.", "aviso");
-      } else {
-        const detalhe = erro ? `${erro.name || "Erro"}: ${erro.message || "sem detalhes"}` : "erro desconhecido";
-        mostrarStatus(`Falha ao compartilhar (${detalhe}). Tente abrir esta página por HTTPS no Chrome ou Edge.`, "erro");
-      }
-    }
-  });
+formulario.addEventListener('reset',()=>setTimeout(()=>{document.getElementById('data').valueAsDate=new Date();arquivoPreparado=null;botaoCompartilhar.disabled=true;statusEl.className='status';statusEl.textContent=''},0));
 </script>
 </body>
 </html>
