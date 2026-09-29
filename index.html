@@ -107,7 +107,7 @@
       </form>
 
       <div class="nota">
-        No Android, toque em <strong>Compartilhar XLSX</strong> e escolha Outlook ou Gmail. Caso o navegador não aceite o compartilhamento de arquivos, a planilha será baixada automaticamente.
+        No Android, abra esta página por um endereço <strong>HTTPS</strong> no Chrome ou Edge. Toque em <strong>Compartilhar XLSX</strong> e escolha Outlook ou Gmail. Abrir o HTML diretamente da pasta Downloads pode bloquear o compartilhamento.
       </div>
     </section>
   </main>
@@ -185,26 +185,37 @@
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     });
 
-    const compartilhar = {
-      title: `Formulário - ${dados["Nome"]}`,
-      text: `Segue a planilha do formulário de ${dados["Nome"]}, setor ${dados["Setor"]}.`,
-      files: [arquivo]
-    };
+    // Compartilhar somente o arquivo aumenta a compatibilidade no Android.
+    // Alguns aplicativos rejeitam a combinação arquivo + título + texto.
+    const compartilhar = { files: [arquivo] };
 
     try {
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [arquivo] })) {
-        await navigator.share(compartilhar);
-        mostrarStatus("Planilha enviada ao aplicativo escolhido. Confira o destinatário e toque em Enviar.", "ok");
-      } else {
+      if (!window.isSecureContext) {
         baixarArquivo(blob, nomeArquivo);
-        mostrarStatus("Este navegador não permitiu compartilhar o anexo. A planilha foi baixada para você anexar manualmente.", "aviso");
+        mostrarStatus("O compartilhamento de anexos exige uma página HTTPS. Este arquivo foi aberto localmente ou em uma conexão não segura. A planilha foi baixada.", "aviso");
+        return;
       }
+
+      if (!navigator.share || !navigator.canShare) {
+        baixarArquivo(blob, nomeArquivo);
+        mostrarStatus("Este navegador não oferece compartilhamento de arquivos. Abra a página no Chrome ou Edge atualizado. A planilha foi baixada.", "aviso");
+        return;
+      }
+
+      if (!navigator.canShare({ files: [arquivo] })) {
+        baixarArquivo(blob, nomeArquivo);
+        mostrarStatus("Este navegador não aceita compartilhar arquivos XLSX. A planilha foi baixada.", "aviso");
+        return;
+      }
+
+      await navigator.share(compartilhar);
+      mostrarStatus("Planilha enviada ao aplicativo escolhido. Confira o destinatário e toque em Enviar.", "ok");
     } catch (erro) {
       if (erro && erro.name === "AbortError") {
         mostrarStatus("Compartilhamento cancelado. Toque novamente no botão quando quiser continuar.", "aviso");
       } else {
-        baixarArquivo(blob, nomeArquivo);
-        mostrarStatus("Não foi possível abrir o compartilhamento. A planilha foi baixada como alternativa.", "aviso");
+        const detalhe = erro ? `${erro.name || "Erro"}: ${erro.message || "sem detalhes"}` : "erro desconhecido";
+        mostrarStatus(`Falha ao compartilhar (${detalhe}). Tente abrir esta página por HTTPS no Chrome ou Edge.`, "erro");
       }
     }
   });
