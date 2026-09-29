@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f6cbd">
+  <title>Formulário para compartilhar em XLSX</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --azul:#0f6cbd; --azul-escuro:#115ea3; --fundo:#f4f6f8;
+      --texto:#242424; --borda:#d1d1d1; --verde:#107c10; --alerta:#8a6500;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0; min-height:100vh; font-family:Segoe UI, Arial, sans-serif;
+      background:var(--fundo); color:var(--texto);
+    }
+    .container { max-width:760px; margin:0 auto; padding:20px 14px 32px; }
+    .card { background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 6px 24px rgba(0,0,0,.10); }
+    .topo { padding:24px 22px; color:#fff; background:linear-gradient(135deg, var(--azul), #164f86); }
+    .topo h1 { margin:0 0 8px; font-size:24px; }
+    .topo p { margin:0; line-height:1.45; opacity:.94; }
+    form { padding:22px; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:17px; }
+    .campo { display:flex; flex-direction:column; gap:7px; }
+    .campo.largo { grid-column:1/-1; }
+    label { font-size:14px; font-weight:650; }
+    input, select, textarea {
+      width:100%; min-height:46px; padding:11px 12px; border:1px solid var(--borda);
+      border-radius:9px; background:#fff; color:var(--texto); font:inherit; font-size:16px;
+    }
+    textarea { min-height:125px; resize:vertical; }
+    input:focus, select:focus, textarea:focus { outline:3px solid #c7e0f4; border-color:var(--azul); }
+    .acoes { display:grid; grid-template-columns:2fr 1fr; gap:11px; margin-top:23px; }
+    button { min-height:50px; border:0; border-radius:9px; padding:12px 15px; font:inherit; font-weight:700; cursor:pointer; }
+    .primario { color:#fff; background:var(--azul); }
+    .primario:active { background:var(--azul-escuro); transform:scale(.99); }
+    .secundario { color:var(--texto); background:#ececec; }
+    .status { display:none; margin-top:17px; padding:13px 14px; border-radius:8px; line-height:1.45; }
+    .status.ok { display:block; color:#0b5f0b; background:#dff6dd; }
+    .status.aviso { display:block; color:#684b00; background:#fff4ce; }
+    .status.erro { display:block; color:#a4262c; background:#fde7e9; }
+    .nota { margin:0 22px 22px; padding:13px 14px; border-left:4px solid var(--azul); background:#f0f6fb; border-radius:5px; font-size:14px; line-height:1.45; }
+    @media (max-width:620px) {
+      .container { padding:0; }
+      .card { min-height:100vh; border-radius:0; }
+      .grid { grid-template-columns:1fr; }
+      .campo.largo { grid-column:auto; }
+      .acoes { grid-template-columns:1fr; }
+      .topo { padding-top:calc(24px + env(safe-area-inset-top)); }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="card">
+      <header class="topo">
+        <h1>Formulário de solicitação</h1>
+        <p>Preencha os dados e compartilhe a planilha diretamente com o Outlook, Gmail ou outro aplicativo no Android.</p>
+      </header>
+
+      <form id="formulario">
+        <div class="grid">
+          <div class="campo">
+            <label for="nome">Nome *</label>
+            <input id="nome" name="nome" autocomplete="name" required>
+          </div>
+          <div class="campo">
+            <label for="matricula">Matrícula</label>
+            <input id="matricula" name="matricula" inputmode="numeric">
+          </div>
+          <div class="campo">
+            <label for="setor">Setor *</label>
+            <input id="setor" name="setor" required>
+          </div>
+          <div class="campo">
+            <label for="email">E-mail do solicitante *</label>
+            <input id="email" name="email" type="email" autocomplete="email" inputmode="email" required>
+          </div>
+          <div class="campo">
+            <label for="data">Data *</label>
+            <input id="data" name="data" type="date" required>
+          </div>
+          <div class="campo">
+            <label for="tipo">Tipo da solicitação *</label>
+            <select id="tipo" name="tipo" required>
+              <option value="">Selecione</option>
+              <option>Suporte de TI</option>
+              <option>Acesso</option>
+              <option>Equipamento</option>
+              <option>Impressora</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div class="campo largo">
+            <label for="descricao">Descrição *</label>
+            <textarea id="descricao" name="descricao" required></textarea>
+          </div>
+        </div>
+
+        <div class="acoes">
+          <button type="submit" class="primario">Compartilhar XLSX</button>
+          <button type="reset" class="secundario">Limpar</button>
+        </div>
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+      </form>
+
+      <div class="nota">
+        No Android, toque em <strong>Compartilhar XLSX</strong> e escolha Outlook ou Gmail. Caso o navegador não aceite o compartilhamento de arquivos, a planilha será baixada automaticamente.
+      </div>
+    </section>
+  </main>
+
+<script>
+  const formulario = document.getElementById("formulario");
+  const statusEl = document.getElementById("status");
+  document.getElementById("data").valueAsDate = new Date();
+
+  function mostrarStatus(texto, tipo) {
+    statusEl.textContent = texto;
+    statusEl.className = "status " + tipo;
+  }
+
+  function limparNomeArquivo(texto) {
+    return texto.normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9_-]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+  }
+
+  function baixarArquivo(blob, nomeArquivo) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = nomeArquivo;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+
+  formulario.addEventListener("reset", () => {
+    setTimeout(() => {
+      document.getElementById("data").valueAsDate = new Date();
+      statusEl.className = "status";
+      statusEl.textContent = "";
+    }, 0);
+  });
+
+  formulario.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    if (!formulario.reportValidity()) return;
+
+    if (typeof XLSX === "undefined") {
+      mostrarStatus("Não foi possível carregar o gerador de Excel. Verifique a conexão com a internet e tente novamente.", "erro");
+      return;
+    }
+
+    const dados = {
+      "Nome": document.getElementById("nome").value.trim(),
+      "Matrícula": document.getElementById("matricula").value.trim(),
+      "Setor": document.getElementById("setor").value.trim(),
+      "E-mail": document.getElementById("email").value.trim(),
+      "Data": document.getElementById("data").value,
+      "Tipo da solicitação": document.getElementById("tipo").value,
+      "Descrição": document.getElementById("descricao").value.trim()
+    };
+
+    const linhas = Object.entries(dados).map(([campo, resposta]) => ({ Campo: campo, Resposta: resposta }));
+    const folha = XLSX.utils.json_to_sheet(linhas);
+    folha["!cols"] = [{ wch: 24 }, { wch: 72 }];
+
+    const pasta = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(pasta, folha, "Formulário");
+
+    const conteudo = XLSX.write(pasta, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([conteudo], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
+
+    const hoje = new Date().toISOString().slice(0, 10);
+    const nomeArquivo = `Formulario_${limparNomeArquivo(dados["Nome"] || "Sem_nome")}_${hoje}.xlsx`;
+    const arquivo = new File([blob], nomeArquivo, {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
+
+    const compartilhar = {
+      title: `Formulário - ${dados["Nome"]}`,
+      text: `Segue a planilha do formulário de ${dados["Nome"]}, setor ${dados["Setor"]}.`,
+      files: [arquivo]
+    };
+
+    try {
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [arquivo] })) {
+        await navigator.share(compartilhar);
+        mostrarStatus("Planilha enviada ao aplicativo escolhido. Confira o destinatário e toque em Enviar.", "ok");
+      } else {
+        baixarArquivo(blob, nomeArquivo);
+        mostrarStatus("Este navegador não permitiu compartilhar o anexo. A planilha foi baixada para você anexar manualmente.", "aviso");
+      }
+    } catch (erro) {
+      if (erro && erro.name === "AbortError") {
+        mostrarStatus("Compartilhamento cancelado. Toque novamente no botão quando quiser continuar.", "aviso");
+      } else {
+        baixarArquivo(blob, nomeArquivo);
+        mostrarStatus("Não foi possível abrir o compartilhamento. A planilha foi baixada como alternativa.", "aviso");
+      }
+    }
+  });
+</script>
+</body>
+</html>
